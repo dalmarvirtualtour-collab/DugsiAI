@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: dugsiai-postgres
+    environment:
+      POSTGRES_USER: dugsi_user
+      POSTGRES_PASSWORD: dugsi_password_2026
+      POSTGRES_DB: dugsi_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  dugsiai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dugsiai-app
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://dugsi_user:dugsi_password_2026@postgres:5432/dugsi_db?schema=public
+      - JWT_SECRET=dugsiai_super_secret_session_key_2026
+      - PAYMENT_PHONE_NUMBER=+251930379676
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    command: >
+      sh -c "
+        echo 'Waiting for postgres...' &&
+        sleep 5 &&
+        npx prisma db push &&
+        npx prisma db seed &&
+        npm run start
+      "
+    restart: always
+
+volumes:
+  pgdata:

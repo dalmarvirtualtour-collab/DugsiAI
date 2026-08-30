@@ -1,0 +1,328 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String            @id @default(uuid())
+  name              String
+  phone             String            @unique
+  email             String?           @unique
+  passwordHash      String
+  role              String            @default("STUDENT") // "GUEST" | "STUDENT" | "PARENT" | "TEACHER" | "SCHOOL_ADMIN" | "SUPER_ADMIN"
+  region            String
+  preferredLanguage String            @default("en") // "en" | "so" | "am" | "om"
+  profilePhoto      String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  student           Student?
+  parent            Parent?
+  teacher           Teacher?
+  schoolAdmin       SchoolAdmin?
+  subscription      Subscription?
+  
+  payments          Payment[]
+  conversations     AIConversation[]
+  usageLogs         AIUsage[]
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  supportRequests   SupportRequest[]
+}
+
+model Student {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  grade             Int               // 7 to 12
+  parentPhone       String
+  parentId          String?
+  parent            Parent?           @relation(fields: [parentId], references: [id])
+  schoolId          String?
+  school            School?           @relation(fields: [schoolId], references: [id])
+  quizAttempts      QuizAttempt[]
+  examAttempts      ExamAttempt[]
+  labProgress       LabProgress[]
+}
+
+model Parent {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students          Student[]
+}
+
+model Teacher {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schoolId          String
+  school            School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  subject           String            // Subject they teach
+}
+
+model SchoolAdmin {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  schoolId          String
+  school            School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+}
+
+model School {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  region            String
+  address           String?
+  createdAt         DateTime          @default(now())
+  
+  students          Student[]
+  teachers          Teacher[]
+  schoolAdmins      SchoolAdmin[]
+}
+
+model Subject {
+  id          String    @id @default(uuid())
+  name        String
+  grade       Int       // 7 to 12
+  description String?
+  chapters    Chapter[]
+}
+
+model Chapter {
+  id            String     @id @default(uuid())
+  name          String
+  chapterNumber Int
+  subjectId     String
+  subject       Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  lessons       Lesson[]
+  questions     Question[]
+}
+
+model Lesson {
+  id             String              @id @default(uuid())
+  title          String
+  lessonNumber   Int
+  content        String              // Markdown or HTML content
+  textbookAccess String              @default("FREEMIUM") // "FREEMIUM" | "REGULAR" | "PREMIUM"
+  chapterId      String
+  chapter        Chapter             @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  objectives     String?
+  vocabulary     String?
+  definitions    String?
+  translations   LessonTranslation[]
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  type          String   // "MCQ" | "TRUE_FALSE" | "FILL_BLANK" | "SHORT_ANSWER"
+  text          String
+  options       String   // JSON array of strings
+  correctAnswer String
+  explanation   String
+  difficulty    String   // "EASY" | "MEDIUM" | "HARD"
+  chapterId     String
+  chapter       Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+}
+
+model MockExam {
+  id              String   @id @default(uuid())
+  title           String
+  grade           Int
+  subjectId       String
+  durationMinutes Int
+  questionsList   String   // JSON array of Question IDs or embedded questions
+}
+
+model QuizAttempt {
+  id             String   @id @default(uuid())
+  studentId      String
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  chapterId      String
+  score          Int
+  totalQuestions Int
+  answers        String   // JSON of student answers
+  createdAt      DateTime @default(now())
+}
+
+model ExamAttempt {
+  id             String   @id @default(uuid())
+  studentId      String
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  examId         String
+  score          Int
+  totalQuestions Int
+  answers        String   // JSON of student answers
+  createdAt      DateTime @default(now())
+}
+
+model AIConversation {
+  id         String      @id @default(uuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subjectId  String?
+  chapterId  String?
+  title      String
+  createdAt  DateTime    @default(now())
+  messages   AIMessage[]
+}
+
+model AIMessage {
+  id             String         @id @default(uuid())
+  conversationId String
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         String         // "user" | "ai"
+  text           String
+  voiceUrl       String?
+  createdAt      DateTime       @default(now())
+}
+
+model AIUsage {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date              String   // YYYY-MM-DD
+  messageCount      Int      @default(0)
+  textTokensToday   Int      @default(0)
+  audioSecondsToday Float    @default(0.0)
+}
+
+model Subscription {
+  id                 String    @id @default(uuid())
+  userId             String    @unique
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan               String    @default("FREEMIUM") // "FREEMIUM" | "REGULAR" | "PREMIUM"
+  startDate          DateTime  @default(now())
+  endDate            DateTime?
+  status             String    @default("ACTIVE") // "ACTIVE" | "EXPIRED"
+  audioBufferSeconds Float     @default(0.0)
+  totalSpendUSD      Float     @default(0.0)
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan            String   // "REGULAR" | "PREMIUM"
+  amount          Float
+  method          String   // "TELEBIRR" | "CBE_BIRR" | "E_BIRR" | "KAAFI" | "ESAHAL"
+  senderPhone     String
+  transactionRef  String?
+  smsConfirmation String
+  screenshotUrl   String?
+  status          String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  createdAt       DateTime @default(now())
+  verifiedAt      DateTime?
+  verifiedBy      String?  // Name/ID of verifying admin
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SupportRequest {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  subject   String
+  message   String
+  status    String   @default("PENDING") // "PENDING" | "RESOLVED"
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  details   String
+  createdAt DateTime @default(now())
+}
+
+model SystemSetting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+}
+
+model LessonTranslation {
+  id            String   @id @default(uuid())
+  lessonId      String
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  language      String   // "en" | "so" | "am" | "om"
+  title         String
+  content       String
+  objectives    String?
+  vocabulary    String?
+  definitions   String?
+  createdAt     DateTime @default(now())
+
+  @@unique([lessonId, language])
+}
+
+model ImportHistory {
+  id             String   @id @default(uuid())
+  importDate     DateTime @default(now())
+  importedBy     String
+  grade          Int
+  subject        String
+  filesProcessed Int
+  chaptersCount  Int
+  lessonsCount   Int
+  questionsCount Int
+  errors         String?
+  warnings       String?
+}
+
+model VirtualLab {
+  id                 String   @id @default(uuid())
+  labId              String   @unique
+  grade              Int
+  subject            String
+  chapterId          String?
+  lessonId           String?
+  title              String
+  description        String?
+  learningObjectives String?  // JSON array
+  labType            String   // "PHYSICS" | "BIOLOGY" | "CHEMISTRY" | "MATH" | "GEOGRAPHY"
+  assets             String?  // JSON list
+  configuration      String?  // JSON configuration
+  equations          String?  // JSON equations
+  questions          String?  // JSON questions
+  localization       String?  // JSON translations
+  enabled            Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  
+  progressList       LabProgress[]
+}
+
+model LabProgress {
+  id                String      @id @default(uuid())
+  studentId         String
+  student           Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  labId             String
+  virtualLab        VirtualLab  @relation(fields: [labId], references: [labId], onDelete: Cascade)
+  startedAt         DateTime    @default(now())
+  completedAt       DateTime?
+  attempts          Int         @default(0)
+  score             Float       @default(0.0)
+  timeSpent         Int         @default(0) // seconds
+  experimentResults String?     // JSON of results/states
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([studentId, labId])
+}

@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# credentials keys
+serviceAccountKey.json
+serviceAccountKey.json.json
+node_modules/ 
+.next/ 
+.firebase/ 
+out/ 
+*.log 
+.env*.local 
+prisma/*.db
