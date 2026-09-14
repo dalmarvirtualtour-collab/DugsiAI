@@ -182,8 +182,8 @@ export default function App() {
       const saved = localStorage.getItem('dugsi_saved_auth');
       if (saved) {
         const d = JSON.parse(saved);
-        if (d.phone) setRegPhone(d.phone);
-        if (d.pass) setRegPass(d.pass);
+        if (d.phone) { setRegPhone(d.phone); setLoginPhone(d.phone); }
+        if (d.pass) { setRegPassword(d.pass); setLoginPassword(d.pass); }
       }
     } catch (e) {}
   }, []);
