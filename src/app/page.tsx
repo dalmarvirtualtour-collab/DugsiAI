@@ -586,13 +586,13 @@ export default function App() {
 
   // Intercept actions that require login
   const checkAuthGuard = (tabName: string) => {
-    if (!isRegistered && ['courses', 'tutoring', 'dashboard'].includes(tabName)) {
-      alert("Registration is mandatory. Please create a profile or login to access textbooks, quizzes, mock exams and AI features.");
+    if (!isRegistered && ['courses', 'tutoring', 'dashboard', 'exams'].includes(tabName)) {
+      alert("Registration is mandatory. Please create a profile or login to access national exam papers, textbooks, and AI features.");
       setShowRegisterModal(true);
       return false;
     }
-    if (tabName === 'dashboard' && subscription === 'freemium') {
-      alert("The Exam Dashboard and progress reports are premium features. Upgrade your subscription to unlock them!");
+    if (['dashboard', 'exams'].includes(tabName) && subscription === 'freemium') {
+      alert("National Examination papers and Exam Dashboards are premium features. Upgrade your subscription to unlock them!");
       handleUpgradeClick('regular');
       return false;
     }
