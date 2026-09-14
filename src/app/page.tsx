@@ -77,6 +77,7 @@ export default function App() {
 
   // Auth Modal States
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [isLoginMode, setIsLoginMode] = useState(false);
   const [loginPhone, setLoginPhone] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -176,6 +177,17 @@ export default function App() {
   const scrollVelocityCountRef = useRef<number>(0);
 
   // Lesson Reading Telemetry Effect
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('dugsi_saved_auth');
+      if (saved) {
+        const d = JSON.parse(saved);
+        if (d.phone) setRegPhone(d.phone);
+        if (d.pass) setRegPass(d.pass);
+      }
+    } catch (e) {}
+  }, []);
+
   useEffect(() => {
     if (!currentLesson) return;
 
@@ -2732,11 +2744,28 @@ export default function App() {
               <X className="h-5 w-5" />
             </button>
 
-            <div className="text-center space-y-1">
-              <h3 className="text-xl font-bold">{isLoginMode ? 'Sign In to DugsiAI' : 'Create Your DugsiAI Profile'}</h3>
+            <div className="text-center space-y-1 mb-3">
+                <h3 className="text-xl font-bold">{isLoginMode ? 'Welcome Back' : 'Create Your DugsiAI Profile'}</h3>
+                <p className="text-xs text-gray-400">{isLoginMode ? 'Sign in to access your study dashboard and exams.' : 'Unlock customized textbook tracking and ESSLCE progress portfolios.'}</p>
+              </div>
 
-              <p className="text-xs text-gray-400">Unlock customized textbook tracking and ESSLCE progress portfolios.</p>
-            </div>
+              {/* Segmented Top Navigation Tabs */}
+              <div className="grid grid-cols-2 gap-1 p-1 bg-gray-900/95 rounded-xl border border-gray-800 my-3">
+                <button
+                  type="button"
+                  onClick={() => setIsLoginMode(true)}
+                  className={`py-2 text-xs font-bold rounded-lg transition-all ${isLoginMode ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
+                >
+                  Sign In (Returning User)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsLoginMode(false)}
+                  className={`py-2 text-xs font-bold rounded-lg transition-all ${!isLoginMode ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
+                >
+                  Sign Up (New User)
+                </button>
+              </div>
 
             {/* Google Sign-up */}
             <div className="space-y-2 pt-2">
