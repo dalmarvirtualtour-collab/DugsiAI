@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'No content found' }, { status: 404 });
     }
 
-    let targetDoc = snapshot.docs.find(doc => {
+    let targetDoc = snapshot.docs.find((doc: any) => {
       const data = doc.data();
       return pageNum >= (data.start_page || 0) && pageNum <= (data.end_page || 9999);
     }) || snapshot.docs[0];

@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const snapshot = await db.collection('textbook_chunks').select('grade', 'subject').get();
     const map: Record<number, Set<string>> = {};
-    snapshot.docs.forEach(doc => {
+    snapshot.docs.forEach((doc: any) => {
       const data = doc.data();
       const g = data.grade;
       const s = data.subject;
