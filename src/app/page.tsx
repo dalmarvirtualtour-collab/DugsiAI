@@ -3069,20 +3069,22 @@ export default function App() {
                         {selectedPayMethod === 'ebirr_coopay' && (
                           <>
                             <p>1. Open your <strong>eBirr / CooPay App</strong> or dial <strong>*841#</strong>.</p>
-                            <p>2. Choose <strong>Pay Merchant</strong>.</p>
-                            <p>3. Enter Merchant Account ID: <span className="font-mono text-purple-400 font-bold bg-purple-950/40 px-2 py-0.5 rounded">221100</span>.</p>
-                            <p>4. Send exactly <strong className="text-purple-400">{showUpgradeModal === 'regular' ? '600' : '5000'} ETB</strong>.</p>
+                            <p>2. Select <strong>Send Money / Transfer</strong>.</p>
+                            <p>3. Enter Recipient Phone Number: <span className="font-mono text-emerald-400 font-bold bg-emerald-950/70 border border-emerald-500/50 px-2 py-0.5 rounded text-sm select-all">+251930379676</span></p>
+                            <p>4. Account Name: <strong className="text-white">Samatar Ibrahim Ahmed</strong></p>
+                            <p>5. Send exactly <strong className="text-emerald-400">{showUpgradeModal === 'regular' ? '600' : '5000'} ETB</strong>.</p>
                           </>
                         )}
                         {selectedPayMethod === 'ebirr_kaafi' && (
                           <>
-                            <p>1. Dial your Kaafi Wallet payment code or open the app.</p>
-                            <p>2. Select <strong>Transfer money</strong>.</p>
-                            <p>3. Enter Merchant Wallet number: <span className="font-mono text-purple-400 font-bold bg-purple-950/40 px-2 py-0.5 rounded">85532</span>.</p>
-                            <p>4. Send exactly <strong className="text-purple-400">{showUpgradeModal === 'regular' ? '600' : '5000'} ETB</strong>.</p>
+                            <p>1. Open your <strong>Kaafi Wallet</strong> or dial your Kaafi USSD code.</p>
+                            <p>2. Select <strong>Transfer / Send Money</strong>.</p>
+                            <p>3. Enter Mobile Number: <span className="font-mono text-emerald-400 font-bold bg-emerald-950/70 border border-emerald-500/50 px-2 py-0.5 rounded text-sm select-all">+251930379676</span></p>
+                            <p>4. Account Name: <strong className="text-white">Samatar Ibrahim Ahmed</strong></p>
+                            <p>5. Send exactly <strong className="text-emerald-400">{showUpgradeModal === 'regular' ? '600' : '5000'} ETB</strong>.</p>
                           </>
                         )}
-                        <p className="text-[10px] text-gray-500 italic pt-1">Please copy the resulting Transaction ID / Reference Code from your SMS receipt immediately.</p>
+                        <p className="text-[11px] text-amber-300 font-medium pt-1">Important: Save your SMS confirmation or take a screenshot of the transaction receipt.</p>
                       </div>
                     </div>
 
