@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { 
@@ -1175,7 +1175,7 @@ export default function App() {
                 <span className="font-extrabold text-2xl tracking-wider">
                   Dugsi<span className="text-yellow-500">AI</span>
                 </span>
-                <span className="text-xs bg-purple-900/80 text-purple-300 px-2 py-0.5 rounded border border-purple-700 font-mono">v3.1 Flash</span>
+               
               </div>
               <p className="text-[10px] text-gray-400 tracking-tight">Samaale Institute x Linggax Tech</p>
             </div>
@@ -1758,7 +1758,7 @@ export default function App() {
                   <div>
                     <span className="text-[10px] bg-amber-900/20 text-amber-500 font-bold px-3 py-1 rounded-full uppercase tracking-wider">Premium Plan</span>
                     <div className="my-4">
-                      <span className="text-3xl font-extrabold">5,000 ETB</span>
+                      <span className="text-3xl font-extrabold">1,500 ETB</span>
                       <span className="text-xs text-gray-500"> / month</span>
                       <p className="text-[10px] text-gray-550 pt-0.5">($27.78 USD Monthly Budget Equivalent)</p>
                     </div>
@@ -2734,6 +2734,35 @@ export default function App() {
 
             <div className="text-center space-y-1">
               <h3 className="text-xl font-bold">{isLoginMode ? 'Sign In to DugsiAI' : 'Create Your DugsiAI Profile'}</h3>
+{/* --- ADMIN QUICK ACCESS (ONLY FOR SAMATAR) --- */}
+<div className="mb-4 p-3 bg-emerald-950/90 border border-emerald-500/60 rounded-xl flex items-center justify-between shadow-lg">
+  <div className="flex items-center space-x-3 text-left">
+    <div className="w-9 h-9 rounded-full bg-emerald-600 text-white font-bold flex items-center justify-center text-sm border border-emerald-400">
+      SI
+    </div>
+    <div>
+      <div className="text-sm font-bold text-white leading-tight">Samatar Ibrahim Ahmed</div>
+      <div className="text-xs text-emerald-400 font-medium">Super Admin &bull; Instant Access</div>
+    </div>
+  </div>
+  <button
+    type="button"
+    onClick={() => {
+      localStorage.setItem("user", JSON.stringify({
+        id: "ADMIN_SAMATAR",
+        name: "Samatar Ibrahim Ahmed",
+        role: "admin",
+        grade: 7,
+        language: "Somali",
+        isPremium: true
+      }));
+      window.location.href = "/dashboard";
+    }}
+    className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-lg shadow transition"
+  >
+    Access Directly &rarr;
+  </button>
+</div>
               <p className="text-xs text-gray-400">Unlock customized textbook tracking and ESSLCE progress portfolios.</p>
             </div>
 
@@ -3001,7 +3030,7 @@ export default function App() {
                     Manual Payment verification
                   </span>
                   <h3 className="text-xl font-bold pt-2">
-                    {showUpgradeModal === 'regular' ? "Upgrade to Regular Plan (600 ETB/Month)" : "Upgrade to Premium Plan (5,000 ETB/Month)"}
+                    {showUpgradeModal === 'regular' ? "Upgrade to Regular Plan (600 ETB/Month)" : "Upgrade to Premium Plan (1,500 ETB/Month)"}
                   </h3>
                   
                   {/* Step Progress Tracker */}
@@ -3284,3 +3313,4 @@ export default function App() {
     </div>
   );
 }
+

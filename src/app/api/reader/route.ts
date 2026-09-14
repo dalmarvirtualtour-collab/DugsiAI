@@ -4,42 +4,46 @@ import { db } from '@/lib/firebaseAdmin';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const grade_subject_id = searchParams.get('grade_subject_id');
-    const chapter_id = searchParams.get('chapter_id');
-    const lesson_id = searchParams.get('lesson_id');
-    const page_number = searchParams.get('page_number');
+    const gradeParam = searchParams.get('grade') || searchParams.get('grade_subject_id');
+    const subject = searchParams.get('subject');
+    const pageStr = searchParams.get('page_number') || searchParams.get('page') || '1';
+    const pageNum = parseInt(pageStr, 10);
 
-    if (!grade_subject_id || !chapter_id || !lesson_id || !page_number) {
-      return NextResponse.json(
-        { error: 'Missing required query parameters: grade_subject_id, chapter_id, lesson_id, page_number' },
-        { status: 400 }
-      );
+    let grade = 10;
+    if (gradeParam) {
+      const match = gradeParam.match(/\d+/);
+      if (match) grade = parseInt(match[0], 10);
     }
 
-    // Direct Firestore fetch
-    const pageRef = db.collection('curriculum').doc(grade_subject_id)
-                      .collection('chapters').doc(chapter_id)
-                      .collection('lessons').doc(lesson_id)
-                      .collection('pages').doc(page_number);
-
-    const doc = await pageRef.get();
-    
-    if (!doc.exists) {
-      return NextResponse.json(
-        { error: 'Page not found in Firestore curriculum collection.' },
-        { status: 404 }
-      );
+    let query = db.collection('textbook_chunks').where('grade', '==', grade);
+    if (subject && subject.toLowerCase() !== 'all') {
+      query = query.where('subject', '==', subject);
     }
 
+    const snapshot = await query.get();
+    if (snapshot.empty) {
+      return NextResponse.json({ success: false, error: 'No content found' }, { status: 404 });
+    }
+
+    let targetDoc = snapshot.docs.find(doc => {
+      const data = doc.data();
+      return pageNum >= (data.start_page || 0) && pageNum <= (data.end_page || 9999);
+    }) || snapshot.docs[0];
+
+    const data = targetDoc.data();
     return NextResponse.json({
       success: true,
-      data: doc.data()
+      data: {
+        page_content: data.raw_sample || data.summary || '',
+        summary: data.summary || '',
+        subject: data.subject,
+        grade: data.grade,
+        start_page: data.start_page,
+        end_page: data.end_page,
+        total_chunks: snapshot.size
+      }
     });
   } catch (error: any) {
-    console.error('Direct Firestore Reader API error:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error', details: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

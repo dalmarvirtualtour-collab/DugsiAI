@@ -1,64 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getSessionUser } from '@/lib/auth';
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/firebaseAdmin';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
-    const session = getSessionUser(req);
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Please login.' },
-        { status: 401 }
-      );
-    }
-
-    const { searchParams } = new URL(req.url);
-    const gradeParam = searchParams.get('grade');
-    const subjectId = searchParams.get('subjectId');
-
-    if (subjectId) {
-      const chapters = await prisma.chapter.findMany({
-        where: { subjectId },
-        orderBy: { chapterNumber: 'asc' },
-        include: {
-          lessons: {
-            select: {
-              id: true,
-              title: true,
-              lessonNumber: true,
-              textbookAccess: true,
-            },
-            orderBy: { lessonNumber: 'asc' },
-          },
-        },
-      });
-      return NextResponse.json({ success: true, chapters });
-    }
-
-    if (gradeParam) {
-      const grade = parseInt(gradeParam, 10);
-      if (isNaN(grade)) {
-        return NextResponse.json({ error: 'Invalid grade parameter' }, { status: 400 });
+    const snapshot = await db.collection('textbook_chunks').select('grade', 'subject').get();
+    const map: Record<number, Set<string>> = {};
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const g = data.grade;
+      const s = data.subject;
+      if (g && s) {
+        if (!map[g]) map[g] = new Set();
+        map[g].add(s);
       }
-
-      const subjects = await prisma.subject.findMany({
-        where: { grade },
-        include: {
-          _count: {
-            select: { chapters: true },
-          },
-        },
-      });
-      return NextResponse.json({ success: true, subjects });
-    }
-
-    // Default: fetch everything grouped by grade
-    const subjects = await prisma.subject.findMany({
-      orderBy: [{ grade: 'asc' }, { name: 'asc' }],
     });
-    return NextResponse.json({ success: true, subjects });
+    const result = Object.keys(map).map(g => ({
+      grade: parseInt(g, 10),
+      subjects: Array.from(map[parseInt(g, 10)]).sort()
+    })).sort((a, b) => a.grade - b.grade);
+    return NextResponse.json({ success: true, curriculum: result });
   } catch (error: any) {
-    console.error('Curriculum query error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

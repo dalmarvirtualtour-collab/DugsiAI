@@ -50,3 +50,4 @@ out/
 *.log 
 .env*.local 
 prisma/*.db
+.vercel

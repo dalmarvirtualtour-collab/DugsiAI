@@ -1,0 +1,9 @@
+﻿.next
+.firebase
+*.db
+*.sqlite
+*.sqlite-journal
+*.log
+scripts/
+public/**/*.pdf
+public/**/*.mp3
