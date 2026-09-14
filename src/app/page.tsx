@@ -179,7 +179,7 @@ export default function App() {
   
   useEffect(() => {
     const isPaid = isRegistered && subscription && subscription !== 'freemium';
-    const restrictedTabs = ['courses', 'exams', 'tutoring'];
+    const restrictedTabs = ['courses', 'exams', 'tutoring', 'teachers', 'dashboard'];
 
     if (restrictedTabs.includes(currentTab)) {
       if (!isRegistered) {
@@ -602,7 +602,7 @@ export default function App() {
 
   // Intercept actions that require login
   const checkAuthGuard = (tabName: string) => {
-    const restricted = ['courses', 'exams', 'tutoring', 'dashboard'];
+    const restricted = ['courses', 'exams', 'tutoring', 'teachers', 'dashboard'];
     if (restricted.includes(tabName)) {
       if (!isRegistered) {
         setShowRegisterModal(true);
@@ -2103,7 +2103,7 @@ export default function App() {
         {currentTab === 'tutoring' && (
           <PremiumReader userProfile={userProfile} subscription={subscription} isEmbedded={true} />
         )}        {/* TAB 5: TEACHERS / EXAMS */}
-        {currentTab === 'teachers' && (
+        {currentTab === 'teachers' && isRegistered && subscription && subscription !== 'freemium' && (
           <ExamsWorkspace userProfile={userProfile} subscription={subscription} />
         )}
 
