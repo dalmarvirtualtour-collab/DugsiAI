@@ -176,6 +176,22 @@ export default function App() {
   const scrollVelocitySumRef = useRef<number>(0);
   const scrollVelocityCountRef = useRef<number>(0);
 
+  
+  useEffect(() => {
+    const isPaid = isRegistered && subscription && subscription !== 'freemium';
+    const restrictedTabs = ['courses', 'exams', 'tutoring'];
+
+    if (restrictedTabs.includes(currentTab)) {
+      if (!isRegistered) {
+        setCurrentTab('home');
+        setShowRegisterModal(true);
+      } else if (!isPaid) {
+        setCurrentTab('home');
+        handleUpgradeClick('regular');
+      }
+    }
+  }, [currentTab, isRegistered, subscription]);
+
   // Lesson Reading Telemetry Effect
   useEffect(() => {
     try {
@@ -586,15 +602,16 @@ export default function App() {
 
   // Intercept actions that require login
   const checkAuthGuard = (tabName: string) => {
-    if (!isRegistered && ['courses', 'tutoring', 'dashboard', 'exams'].includes(tabName)) {
-      alert("Registration is mandatory. Please create a profile or login to access national exam papers, textbooks, and AI features.");
-      setShowRegisterModal(true);
-      return false;
-    }
-    if (['dashboard', 'exams'].includes(tabName) && subscription === 'freemium') {
-      alert("National Examination papers and Exam Dashboards are premium features. Upgrade your subscription to unlock them!");
-      handleUpgradeClick('regular');
-      return false;
+    const restricted = ['courses', 'exams', 'tutoring', 'dashboard'];
+    if (restricted.includes(tabName)) {
+      if (!isRegistered) {
+        setShowRegisterModal(true);
+        return false;
+      }
+      if (!subscription || subscription === 'freemium') {
+        handleUpgradeClick('regular');
+        return false;
+      }
     }
     return true;
   };
